@@ -3,14 +3,12 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-// Get stats
 $stats = $this->get_dashboard_stats();
 ?>
-
 <div class="wrap culinary-canvas-dashboard">
-    <div class="dashboard-title">
+    <div class="dashboard-header">
         <h1><?php _e('Recipe Dashboard', 'culinary-canvas-pro'); ?></h1>
-        <a href="<?php echo admin_url('post-new.php?post_type=recipe'); ?>" class="page-title-action">
+        <a href="<?php echo esc_url(admin_url('post-new.php?post_type=recipe')); ?>" class="page-title-action">
             <?php _e('Add New Recipe', 'culinary-canvas-pro'); ?>
         </a>
     </div>
@@ -71,9 +69,11 @@ $stats = $this->get_dashboard_stats();
                         <?php foreach ($recent_recipes as $recipe) : ?>
                             <tr>
                                 <td>
-                                    <a href="<?php echo get_edit_post_link($recipe->ID); ?>">
-                                        <strong><?php echo esc_html($recipe->post_title); ?></strong>
-                                    </a>
+                                    <strong>
+                                        <a href="<?php echo get_edit_post_link($recipe->ID); ?>">
+                                            <?php echo esc_html($recipe->post_title); ?>
+                                        </a>
+                                    </strong>
                                 </td>
                                 <td><?php echo get_the_author_meta('display_name', $recipe->post_author); ?></td>
                                 <td><?php echo get_the_date('', $recipe->ID); ?></td>
@@ -82,7 +82,7 @@ $stats = $this->get_dashboard_stats();
                     </tbody>
                 </table>
             <?php else : ?>
-                <p><?php _e('No recipes found.', 'culinary-canvas-pro'); ?></p>
+                <p class="no-recipes"><?php _e('No recipes found.', 'culinary-canvas-pro'); ?></p>
             <?php endif; ?>
         </div>
 
