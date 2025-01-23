@@ -65,3 +65,21 @@ function culinary_canvas_sanitize_settings($settings) {
     
     return $settings;
 }
+
+
+// Initialize in this order
+function CulinaryCanvas_Pro_Init() {
+    // First initialize post type
+    $post_type = new CulinaryCanvas_Recipe_Post_Type();
+    
+    // Then initialize admin
+    if (is_admin()) {
+        $admin = new CulinaryCanvas_Recipe_Admin();
+    }
+    
+    // Initialize other components
+    $metadata = new CulinaryCanvas_Recipe_Metadata();
+    $ratings = new CulinaryCanvas_Recipe_Ratings();
+}
+
+add_action('plugins_loaded', 'CulinaryCanvas_Pro_Init');
