@@ -1,0 +1,148 @@
+/* Settings Page Styles */
+.culinary-settings-wrap {
+    margin: 20px;
+    max-width: 1200px;
+}
+
+/* Settings Tabs */
+.settings-tabs {
+    margin-bottom: 20px;
+    border-bottom: 1px solid #c3c4c7;
+    padding: 0;
+    display: flex;
+    gap: 4px;
+}
+
+.tab-link {
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 16px;
+    text-decoration: none;
+    color: #1d2327;
+    background: #f0f0f1;
+    border: 1px solid #c3c4c7;
+    border-bottom: none;
+    margin-bottom: -1px;
+    font-size: 14px;
+    font-weight: 500;
+    border-radius: 4px 4px 0 0;
+}
+
+.tab-link:hover {
+    background: #fff;
+    color: #2271b1;
+}
+
+.tab-link.active {
+    background: #fff;
+    border-bottom: 1px solid #fff;
+    color: #2271b1;
+}
+
+.tab-link .dashicons {
+    margin-right: 6px;
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+}
+
+/* Settings Content */
+.settings-content {
+    background: #fff;
+    border: 1px solid #c3c4c7;
+    border-top: none;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+/* Form Elements */
+.form-table th {
+    width: 200px;
+    padding: 20px 10px 20px 0;
+}
+
+.form-table td {
+    padding: 20px 10px;
+}
+
+.regular-text {
+    width: 25em;
+}
+
+/* Description Text */
+.description {
+    color: #646970;
+    font-style: italic;
+    margin-top: 4px;
+}
+
+/* Checkboxes and Radio Buttons */
+.form-table fieldset label {
+    display: block;
+    margin: 4px 0;
+}
+
+input[type="checkbox"] + label {
+    margin-left: 8px;
+}
+
+/* Submit Button */
+.submit {
+    padding: 20px 0;
+    margin-top: 0;
+}
+
+/* Responsive Design */
+@media screen and (max-width: 782px) {
+    .settings-tabs {
+        flex-wrap: wrap;
+    }
+    
+    .tab-link {
+        flex: 1 1 auto;
+        text-align: center;
+        justify-content: center;
+    }
+    
+    .form-table th {
+        width: 100%;
+        display: block;
+        padding-bottom: 0;
+    }
+    
+    .form-table td {
+        padding-top: 10px;
+    }
+    
+    .regular-text {
+        width: 100%;
+    }
+}
+
+/* Additional Styling */
+.form-table tr:not(:last-child) {
+    border-bottom: 1px solid #f0f0f1;
+}
+
+.settings-content h2 {
+    margin-top: 0;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #f0f0f1;
+}
+
+/* Success Message */
+.settings-updated {
+    margin: 5px 0 15px;
+    background: #fff;
+    border-left: 4px solid #00a32a;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.04);
+    padding: 12px;
+}
