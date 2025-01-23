@@ -24,78 +24,71 @@ class CulinaryCanvas_Recipe_Admin {
     }
 
     public function add_admin_menu() {
-        // Remove the original menu item that might be added by register_post_type
-        remove_menu_page('edit.php?post_type=recipe');
-
         // Add our custom menu
         add_menu_page(
-            __('Recipes', 'culinary-canvas-pro'),
+            __('Recipe Dashboard', 'culinary-canvas-pro'),
             __('Recipes', 'culinary-canvas-pro'),
             'manage_options',
-            $this->plugin_slug,
+            'recipe-dashboard',
             array($this, 'render_dashboard_page'),
             'dashicons-food',
             5
         );
-
+    
         // Add submenu items
-        $submenus = array(
-            array(
-                'parent' => $this->plugin_slug,
-                'page_title' => __('Recipe Dashboard', 'culinary-canvas-pro'),
-                'menu_title' => __('Dashboard', 'culinary-canvas-pro'),
-                'capability' => 'manage_options',
-                'slug' => $this->plugin_slug,
-                'callback' => array($this, 'render_dashboard_page')
-            ),
-            array(
-                'parent' => $this->plugin_slug,
-                'page_title' => __('All Recipes', 'culinary-canvas-pro'),
-                'menu_title' => __('All Recipes', 'culinary-canvas-pro'),
-                'capability' => 'manage_options',
-                'slug' => 'edit.php?post_type=recipe'
-            ),
-            array(
-                'parent' => $this->plugin_slug,
-                'page_title' => __('Add New Recipe', 'culinary-canvas-pro'),
-                'menu_title' => __('Add New', 'culinary-canvas-pro'),
-                'capability' => 'manage_options',
-                'slug' => 'post-new.php?post_type=recipe'
-            ),
-            array(
-                'parent' => $this->plugin_slug,
-                'page_title' => __('Categories', 'culinary-canvas-pro'),
-                'menu_title' => __('Categories', 'culinary-canvas-pro'),
-                'capability' => 'manage_options',
-                'slug' => 'edit-tags.php?taxonomy=recipe_category&post_type=recipe'
-            ),
-            array(
-                'parent' => $this->plugin_slug,
-                'page_title' => __('Tags', 'culinary-canvas-pro'),
-                'menu_title' => __('Tags', 'culinary-canvas-pro'),
-                'capability' => 'manage_options',
-                'slug' => 'edit-tags.php?taxonomy=recipe_tag&post_type=recipe'
-            ),
-            array(
-                'parent' => $this->plugin_slug,
-                'page_title' => __('Settings', 'culinary-canvas-pro'),
-                'menu_title' => __('Settings', 'culinary-canvas-pro'),
-                'capability' => 'manage_options',
-                'slug' => 'recipe-settings',
-                'callback' => array($this, 'render_settings_page')
-            )
+        add_submenu_page(
+            'recipe-dashboard',
+            __('Dashboard', 'culinary-canvas-pro'),
+            __('Dashboard', 'culinary-canvas-pro'),
+            'manage_options',
+            'recipe-dashboard',
+            array($this, 'render_dashboard_page')
         );
-
-        foreach ($submenus as $submenu) {
-            add_submenu_page(
-                $submenu['parent'],
-                $submenu['page_title'],
-                $submenu['menu_title'],
-                $submenu['capability'],
-                $submenu['slug'],
-                isset($submenu['callback']) ? $submenu['callback'] : null
-            );
-        }
+    
+        add_submenu_page(
+            'recipe-dashboard',
+            __('All Recipes', 'culinary-canvas-pro'),
+            __('All Recipes', 'culinary-canvas-pro'),
+            'manage_options',
+            'edit.php?post_type=recipe',
+            null
+        );
+    
+        add_submenu_page(
+            'recipe-dashboard',
+            __('Add New Recipe', 'culinary-canvas-pro'),
+            __('Add New', 'culinary-canvas-pro'),
+            'manage_options',
+            'post-new.php?post_type=recipe',
+            null
+        );
+    
+        add_submenu_page(
+            'recipe-dashboard',
+            __('Recipe Categories', 'culinary-canvas-pro'),
+            __('Categories', 'culinary-canvas-pro'),
+            'manage_options',
+            'edit-tags.php?taxonomy=recipe_category&post_type=recipe',
+            null
+        );
+    
+        add_submenu_page(
+            'recipe-dashboard',
+            __('Recipe Tags', 'culinary-canvas-pro'),
+            __('Tags', 'culinary-canvas-pro'),
+            'manage_options',
+            'edit-tags.php?taxonomy=recipe_tag&post_type=recipe',
+            null
+        );
+    
+        add_submenu_page(
+            'recipe-dashboard',
+            __('Recipe Settings', 'culinary-canvas-pro'),
+            __('Settings', 'culinary-canvas-pro'),
+            'manage_options',
+            'recipe-settings',
+            array($this, 'render_settings_page')
+        );
     }
 
     public function render_dashboard_page() {
@@ -196,10 +189,26 @@ class CulinaryCanvas_Recipe_Admin {
     }
 
     private function get_dashboard_stats() {
+        // Get post count properly
+        $count_posts = wp_count_posts('recipe');
+        $total_recipes = isset($count_posts->publish) ? $count_posts->publish : 0;
+    
+        // Get ratings stats
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'recipe_ratings';
+        
+        // Get average rating
+        $average_rating = $wpdb->get_var("SELECT ROUND(AVG(rating), 1) FROM {$table_name}");
+        $average_rating = $average_rating ? $average_rating : '0.0';
+    
+        // Get total reviews
+        $total_reviews = $wpdb->get_var("SELECT COUNT(*) FROM {$table_name}");
+        $total_reviews = $total_reviews ? $total_reviews : 0;
+    
         return array(
-            'total_recipes' => wp_count_posts('recipe')->publish,
-            'average_rating' => $this->get_average_rating(),
-            'total_reviews' => $this->get_total_reviews()
+            'total_recipes' => $total_recipes,
+            'average_rating' => $average_rating,
+            'total_reviews' => $total_reviews
         );
     }
 
