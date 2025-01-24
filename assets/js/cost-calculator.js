@@ -1,7 +1,9 @@
 jQuery(document).ready(function($) {
     // Add new ingredient cost
-    $('#add-ingredient-cost').on('click', function() {
-        const name = $('#new-ingredient-name').val();
+    $('#add-ingredient-cost').on('click', function(e) {
+        e.preventDefault();
+        
+        const name = $('#new-ingredient-name').val().trim();
         const unit = $('#new-ingredient-unit').val();
         const cost = $('#new-ingredient-cost').val();
 
@@ -11,11 +13,11 @@ jQuery(document).ready(function($) {
         }
 
         $.ajax({
-            url: costCalculatorData.ajaxurl,
+            url: ajaxurl,
             type: 'POST',
             data: {
                 action: 'save_ingredient_cost',
-                nonce: costCalculatorData.nonce,
+                security: costCalculatorData.nonce,
                 name: name,
                 unit: unit,
                 cost: cost
@@ -46,7 +48,58 @@ jQuery(document).ready(function($) {
         });
     });
 
-    // Save edited ingredient
+    // Delete ingredient
+    $(document).on('click', '.delete-ingredient', function() {
+        const $row = $(this).closest('tr');
+        const id = $row.data('id');
+
+        if (confirm('Are you sure you want to delete this ingredient?')) {
+            $.ajax({
+                url: ajaxurl,
+                type: 'POST',
+                data: {
+                    action: 'delete_ingredient_cost',
+                    security: costCalculatorData.nonce,
+                    id: id
+                },
+                success: function(response) {
+                    if (response.success) {
+                        $row.remove();
+                    } else {
+                        alert('Error deleting ingredient');
+                    }
+                }
+            });
+        }
+    });
+
+    // Edit functionality
+    $(document).on('click', '.edit-ingredient', function() {
+        const $row = $(this).closest('tr');
+        const name = $row.find('td:eq(0)').text();
+        const unit = $row.find('td:eq(1)').text();
+        const cost = $row.find('td:eq(2)').text().replace(costCalculatorData.currency, '');
+
+        $row.html(`
+            <td><input type="text" class="edit-name" value="${name}"></td>
+            <td>
+                <select class="edit-unit">
+                    <option value="g" ${unit === 'g' ? 'selected' : ''}>Grams (g)</option>
+                    <option value="kg" ${unit === 'kg' ? 'selected' : ''}>Kilograms (kg)</option>
+                    <option value="ml" ${unit === 'ml' ? 'selected' : ''}>Milliliters (ml)</option>
+                    <option value="l" ${unit === 'l' ? 'selected' : ''}>Liters (l)</option>
+                    <option value="piece" ${unit === 'piece' ? 'selected' : ''}>Piece</option>
+                </select>
+            </td>
+            <td><input type="number" class="edit-cost" value="${cost}" step="0.01"></td>
+            <td>
+                <button type="button" class="button save-edit">Save</button>
+                <button type="button" class="button cancel-edit">Cancel</button>
+            </td>
+        `);
+    });
+
+    // Save edit
     $(document).on('click', '.save-edit', function() {
         const $row = $(this).closest('tr');
         const id = $row.data('id');
@@ -55,11 +108,11 @@ jQuery(document).ready(function($) {
         const cost = $row.find('.edit-cost').val();
 
         $.ajax({
-            url: costCalculatorData.ajaxurl,
+            url: ajaxurl,
             type: 'POST',
             data: {
                 action: 'save_ingredient_cost',
-                nonce: costCalculatorData.nonce,
+                security: costCalculatorData.nonce,
                 id: id,
                 name: name,
                 unit: unit,
@@ -99,107 +152,5 @@ jQuery(document).ready(function($) {
                 <button type="button" class="button delete-ingredient">Delete</button>
             </td>
         `);
-    });
-
-    // Delete ingredient
-    $(document).on('click', '.delete-ingredient', function() {
-        const $row = $(this).closest('tr');
-        const id = $row.data('id');
-
-        if (confirm('Are you sure you want to delete this ingredient?')) {
-            $.ajax({
-                url: costCalculatorData.ajaxurl,
-                type: 'POST',
-                data: {
-                    action: 'delete_ingredient_cost',
-                    nonce: costCalculatorData.nonce,
-                    id: id
-                },
-                success: function(response) {
-                    if (response.success) {
-                        $row.remove();
-                    } else {
-                        alert('Error deleting ingredient');
-                    }
-                }
-            });
-        }
-    });
-
-    // Recipe cost calculation
-    $('#recipe-select').on('change', function() {
-        const recipeId = $(this).val();
-        if (!recipeId) {
-            $('#recipe-ingredients-cost').hide();
-            return;
-        }
-
-        $.ajax({
-            url: costCalculatorData.ajaxurl,
-            type: 'POST',
-            data: {
-                action: 'calculate_recipe_cost',
-                nonce: costCalculatorData.nonce,
-                recipe_id: recipeId
-            },
-            success: function(response) {
-                if (response.success) {
-                    let tbody = '';
-                    response.data.ingredients.forEach(ingredient => {
-                        tbody += `
-                            <tr>
-                                <td>${ingredient.name}</td>
-                                <td>${ingredient.quantity} ${ingredient.unit}</td>
-                                <td>${costCalculatorData.currency}${ingredient.unit_cost.toFixed(2)}</td>
-                                <td>${costCalculatorData.currency}${ingredient.total_cost.toFixed(2)}</td>
-                            </tr>
-                        `;
-                    });
-
-                    $('#recipe-ingredients-list').html(tbody);
-                    $('#total-recipe-cost').text(
-                        costCalculatorData.currency + response.data.total_cost.toFixed(2)
-                    );
-                    $('#cost-per-serving').text(
-                        costCalculatorData.currency + response.data.cost_per_serving.toFixed(2)
-                    );
-                    $('#recipe-ingredients-cost').show();
-                }
-            }
-        });
-    });
-
-    // Save recipe cost
-    $('#save-recipe-cost').on('click', function() {
-        const recipeId = $('#recipe-select').val();
-        const totalCost = parseFloat($('#total-recipe-cost').text().replace(costCalculatorData.currency, ''));
-        const costPerServing = parseFloat($('#cost-per-serving').text().replace(costCalculatorData.currency, ''));
-
-        $.ajax({
-            url: costCalculatorData.ajaxurl,
-            type: 'POST',
-            data: {
-                action: 'save_recipe_cost',
-                nonce: costCalculatorData.nonce,
-                recipe_id: recipeId,
-                total_cost: totalCost,
-                cost_per_serving: costPerServing
-            },
-            success: function(response) {
-                if (response.success) {
-                    alert('Recipe cost saved successfully');
-                } else {
-                    alert('Error saving recipe cost');
-                }
-            }
-        });
-    });
-
-    // Initialize tooltips and other UI elements
-    $('[data-toggle="tooltip"]').tooltip();
-    $('.currency-input').on('input', function() {
-        $(this).val(function(i, v) {
-            return v.replace(/[^\d.]/g, '');
-        });
     });
 });

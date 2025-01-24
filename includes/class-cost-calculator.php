@@ -7,10 +7,8 @@ class CulinaryCanvas_Cost_Calculator {
     public function __construct() {
         add_action('add_meta_boxes', array($this, 'add_cost_meta_box'));
         add_action('save_post_recipe', array($this, 'save_cost_meta'));
-        add_action('wp_ajax_calculate_recipe_cost', array($this, 'calculate_recipe_cost'));
-        add_action('wp_ajax_save_ingredient_cost', array($this, 'save_ingredient_cost'));
-        add_action('wp_ajax_delete_ingredient_cost', array($this, 'delete_ingredient_cost'));
         add_action('admin_enqueue_scripts', array($this, 'enqueue_cost_calculator_scripts'));
+        $this->register_ajax_handlers();
     }
 
     public function enqueue_cost_calculator_scripts($hook) {
@@ -18,13 +16,8 @@ class CulinaryCanvas_Cost_Calculator {
             return;
         }
 
-        wp_enqueue_script(
-            'cost-calculator',
-            CCP_PLUGIN_URL . 'assets/js/cost-calculator.js',
-            array('jquery'),
-            CCP_VERSION,
-            true
-        );
+        wp_enqueue_style('cost-calculator-style', CCP_PLUGIN_URL . 'assets/css/cost-calculator-style.css', array(), CCP_VERSION);
+        wp_enqueue_script('cost-calculator', CCP_PLUGIN_URL . 'assets/js/cost-calculator.js', array('jquery'), CCP_VERSION, true);
 
         wp_localize_script('cost-calculator', 'costCalculatorData', array(
             'ajaxurl' => admin_url('admin-ajax.php'),
@@ -33,125 +26,88 @@ class CulinaryCanvas_Cost_Calculator {
         ));
     }
 
-    public function render_cost_calculator_page() {
-        $recipes = get_posts(array(
-            'post_type' => 'recipe',
-            'posts_per_page' => -1,
-            'orderby' => 'title',
-            'order' => 'ASC'
-        ));
+    public function add_cost_meta_box() {
+        add_meta_box(
+            'recipe_cost',
+            __('Recipe Cost', 'culinary-canvas-pro'),
+            array($this, 'render_cost_meta_box'),
+            'recipe',
+            'side',
+            'default'
+        );
+    }
 
+    public function render_cost_meta_box($post) {
+        wp_nonce_field('recipe_cost_meta_box', 'recipe_cost_meta_box_nonce');
+
+        $total_cost = get_post_meta($post->ID, '_recipe_total_cost', true);
+        $cost_per_serving = get_post_meta($post->ID, '_recipe_cost_per_serving', true);
         $currency_symbol = get_option('culinary_canvas_settings')['currency_symbol'] ?? '$';
-        $ingredient_costs = get_option('ingredient_costs', array());
         ?>
-        <div class="wrap">
-            <h1><?php _e('Recipe Cost Calculator', 'culinary-canvas-pro'); ?></h1>
-
-            <div class="cost-calculator-container">
-                <div class="ingredient-costs-section">
-                    <h2><?php _e('Ingredient Cost Database', 'culinary-canvas-pro'); ?></h2>
-                    <table class="wp-list-table widefat fixed striped">
-                        <thead>
-                            <tr>
-                                <th><?php _e('Ingredient', 'culinary-canvas-pro'); ?></th>
-                                <th><?php _e('Unit', 'culinary-canvas-pro'); ?></th>
-                                <th><?php _e('Cost per Unit', 'culinary-canvas-pro'); ?></th>
-                                <th><?php _e('Actions', 'culinary-canvas-pro'); ?></th>
-                            </tr>
-                        </thead>
-                        <tbody id="ingredient-costs-list">
-                            <?php foreach ($ingredient_costs as $id => $cost) : ?>
-                                <tr data-id="<?php echo esc_attr($id); ?>">
-                                    <td><?php echo esc_html($cost['name']); ?></td>
-                                    <td><?php echo esc_html($cost['unit']); ?></td>
-                                    <td><?php echo esc_html($currency_symbol . number_format($cost['cost'], 2)); ?></td>
-                                    <td>
-                                        <button type="button" class="button edit-ingredient">
-                                            <?php _e('Edit', 'culinary-canvas-pro'); ?>
-                                        </button>
-                                        <button type="button" class="button delete-ingredient">
-                                            <?php _e('Delete', 'culinary-canvas-pro'); ?>
-                                        </button>
-                                    </td>
-                                </tr>
-                            <?php endforeach; ?>
-                            <tr id="add-ingredient-row">
-                                <td>
-                                    <input type="text" id="new-ingredient-name" placeholder="<?php esc_attr_e('Ingredient name', 'culinary-canvas-pro'); ?>">
-                                </td>
-                                <td>
-                                    <select id="new-ingredient-unit">
-                                        <option value="g"><?php _e('Grams (g)', 'culinary-canvas-pro'); ?></option>
-                                        <option value="kg"><?php _e('Kilograms (kg)', 'culinary-canvas-pro'); ?></option>
-                                        <option value="ml"><?php _e('Milliliters (ml)', 'culinary-canvas-pro'); ?></option>
-                                        <option value="l"><?php _e('Liters (l)', 'culinary-canvas-pro'); ?></option>
-                                        <option value="piece"><?php _e('Piece', 'culinary-canvas-pro'); ?></option>
-                                    </select>
-                                </td>
-                                <td>
-                                    <input type="number" id="new-ingredient-cost" step="0.01" min="0" 
-                                           placeholder="<?php esc_attr_e('Cost', 'culinary-canvas-pro'); ?>">
-                                </td>
-                                <td>
-                                    <button type="button" class="button" id="add-ingredient-cost">
-                                        <?php _e('Add', 'culinary-canvas-pro'); ?>
-                                    </button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <div class="recipe-cost-calculation">
-                    <h2><?php _e('Calculate Recipe Cost', 'culinary-canvas-pro'); ?></h2>
-                    <div class="recipe-selector">
-                        <label for="recipe-select"><?php _e('Select Recipe:', 'culinary-canvas-pro'); ?></label>
-                        <select id="recipe-select">
-                            <option value=""><?php _e('Choose a recipe...', 'culinary-canvas-pro'); ?></option>
-                            <?php foreach ($recipes as $recipe) : ?>
-                                <option value="<?php echo esc_attr($recipe->ID); ?>">
-                                    <?php echo esc_html($recipe->post_title); ?>
-                                </option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
-
-                    <div id="recipe-ingredients-cost" style="display: none;">
-                        <h3><?php _e('Ingredient Costs', 'culinary-canvas-pro'); ?></h3>
-                        <table class="wp-list-table widefat fixed striped">
-                            <thead>
-                                <tr>
-                                    <th><?php _e('Ingredient', 'culinary-canvas-pro'); ?></th>
-                                    <th><?php _e('Amount', 'culinary-canvas-pro'); ?></th>
-                                    <th><?php _e('Unit Cost', 'culinary-canvas-pro'); ?></th>
-                                    <th><?php _e('Total Cost', 'culinary-canvas-pro'); ?></th>
-                                </tr>
-                            </thead>
-                            <tbody id="recipe-ingredients-list"></tbody>
-                            <tfoot>
-                                <tr>
-                                    <th colspan="3"><?php _e('Total Recipe Cost:', 'culinary-canvas-pro'); ?></th>
-                                    <th id="total-recipe-cost">0.00</th>
-                                </tr>
-                                <tr>
-                                    <th colspan="3"><?php _e('Cost per Serving:', 'culinary-canvas-pro'); ?></th>
-                                    <th id="cost-per-serving">0.00</th>
-                                </tr>
-                            </tfoot>
-                        </table>
-                        <button type="button" class="button button-primary" id="save-recipe-cost">
-                            <?php _e('Save Recipe Cost', 'culinary-canvas-pro'); ?>
-                        </button>
-                    </div>
-                </div>
-            </div>
+        <div class="recipe-cost-details">
+            <p>
+                <strong><?php _e('Total Cost:', 'culinary-canvas-pro'); ?></strong>
+                <?php echo esc_html($currency_symbol . ($total_cost ? number_format($total_cost, 2) : '0.00')); ?>
+            </p>
+            <p>
+                <strong><?php _e('Cost per Serving:', 'culinary-canvas-pro'); ?></strong>
+                <?php echo esc_html($currency_symbol . ($cost_per_serving ? number_format($cost_per_serving, 2) : '0.00')); ?>
+            </p>
+            <button type="button" class="button" id="update-costs">
+                <?php _e('Update Costs', 'culinary-canvas-pro'); ?>
+            </button>
         </div>
         <?php
     }
 
-    public function calculate_recipe_cost() {
-        check_ajax_referer('cost_calculator_nonce', 'nonce');
+    public function register_ajax_handlers() {
+        add_action('wp_ajax_save_ingredient_cost', array($this, 'handle_save_ingredient_cost'));
+        add_action('wp_ajax_delete_ingredient_cost', array($this, 'handle_delete_ingredient_cost'));
+    }
 
+    public function handle_save_ingredient_cost() {
+        check_ajax_referer('cost_calculator_nonce', 'security');
+
+        $name = sanitize_text_field($_POST['name']);
+        $unit = sanitize_text_field($_POST['unit']);
+        $cost = floatval($_POST['cost']);
+        $id = isset($_POST['id']) ? sanitize_text_field($_POST['id']) : uniqid('ingredient_');
+
+        $ingredient_costs = get_option('ingredient_costs', array());
+        $ingredient_costs[$id] = array(
+            'name' => $name,
+            'unit' => $unit,
+            'cost' => $cost
+        );
+
+        update_option('ingredient_costs', $ingredient_costs);
+
+        wp_send_json_success(array(
+            'id' => $id,
+            'name' => $name,
+            'unit' => $unit,
+            'cost' => $cost
+        ));
+    }
+
+    public function handle_delete_ingredient_cost() {
+        check_ajax_referer('cost_calculator_nonce', 'security');
+
+        $id = sanitize_text_field($_POST['id']);
+        $ingredient_costs = get_option('ingredient_costs', array());
+
+        if (isset($ingredient_costs[$id])) {
+            unset($ingredient_costs[$id]);
+            update_option('ingredient_costs', $ingredient_costs);
+            wp_send_json_success();
+        } else {
+            wp_send_json_error('Ingredient not found');
+        }
+    }
+
+    public function ajax_calculate_recipe_cost() {
+        check_ajax_referer('cost_calculator_nonce', 'nonce');
+        
         $recipe_id = isset($_POST['recipe_id']) ? intval($_POST['recipe_id']) : 0;
         if (!$recipe_id) {
             wp_send_json_error('Invalid recipe ID');
@@ -162,11 +118,16 @@ class CulinaryCanvas_Cost_Calculator {
         $servings = get_post_meta($recipe_id, '_servings', true);
         $ingredient_costs = get_option('ingredient_costs', array());
 
+        if (empty($ingredients) || !is_array($ingredients)) {
+            wp_send_json_error('No ingredients found');
+            return;
+        }
+
         $total_cost = 0;
         $ingredient_breakdown = array();
 
         foreach ($ingredients as $ingredient) {
-            // Parse ingredient text to extract quantity and unit
+            // Parse ingredient text
             preg_match('/^([\d.]+)\s*(\w+)\s+(.+)$/', $ingredient, $matches);
             if (count($matches) < 4) continue;
 
@@ -174,7 +135,7 @@ class CulinaryCanvas_Cost_Calculator {
             $unit = $matches[2];
             $name = $matches[3];
 
-            // Find matching ingredient in cost database
+            // Find matching ingredient
             $cost_data = $this->find_matching_ingredient($name, $ingredient_costs);
             if (!$cost_data) continue;
 
@@ -193,6 +154,10 @@ class CulinaryCanvas_Cost_Calculator {
         }
 
         $cost_per_serving = $servings ? ($total_cost / $servings) : 0;
+
+        // Update recipe cost meta
+        update_post_meta($recipe_id, '_recipe_total_cost', $total_cost);
+        update_post_meta($recipe_id, '_recipe_cost_per_serving', $cost_per_serving);
 
         wp_send_json_success(array(
             'total_cost' => $total_cost,
@@ -227,6 +192,18 @@ class CulinaryCanvas_Cost_Calculator {
             'l' => array(
                 'ml' => 1000,
                 'l' => 1
+            ),
+            'tbsp' => array(
+                'ml' => 15,
+                'tsp' => 3
+            ),
+            'tsp' => array(
+                'ml' => 5,
+                'tbsp' => 0.333
+            ),
+            'cup' => array(
+                'ml' => 240,
+                'tbsp' => 16
             )
         );
 
@@ -235,57 +212,6 @@ class CulinaryCanvas_Cost_Calculator {
         }
 
         return $quantity;
-    }
-
-    public function save_ingredient_cost() {
-        check_ajax_referer('cost_calculator_nonce', 'nonce');
-
-        if (!current_user_can('manage_options')) {
-            wp_send_json_error('Permission denied');
-            return;
-        }
-
-        $name = sanitize_text_field($_POST['name']);
-        $unit = sanitize_text_field($_POST['unit']);
-        $cost = floatval($_POST['cost']);
-
-        $ingredient_costs = get_option('ingredient_costs', array());
-        $id = uniqid('ingredient_');
-
-        $ingredient_costs[$id] = array(
-            'name' => $name,
-            'unit' => $unit,
-            'cost' => $cost
-        );
-
-        update_option('ingredient_costs', $ingredient_costs);
-
-        wp_send_json_success(array(
-            'id' => $id,
-            'name' => $name,
-            'unit' => $unit,
-            'cost' => $cost
-        ));
-    }
-
-    public function delete_ingredient_cost() {
-        check_ajax_referer('cost_calculator_nonce', 'nonce');
-
-        if (!current_user_can('manage_options')) {
-            wp_send_json_error('Permission denied');
-            return;
-        }
-
-        $id = sanitize_text_field($_POST['id']);
-        $ingredient_costs = get_option('ingredient_costs', array());
-
-        if (isset($ingredient_costs[$id])) {
-            unset($ingredient_costs[$id]);
-            update_option('ingredient_costs', $ingredient_costs);
-            wp_send_json_success();
-        } else {
-            wp_send_json_error('Ingredient not found');
-        }
     }
 
     public function save_cost_meta($post_id) {
