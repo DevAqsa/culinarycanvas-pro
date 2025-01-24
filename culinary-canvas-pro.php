@@ -38,6 +38,9 @@ class CulinaryCanvas_Pro {
         add_action('plugins_loaded', array($this, 'init'), 0);
         register_activation_hook(__FILE__, array($this, 'activate'));
         register_deactivation_hook(__FILE__, array($this, 'deactivate'));
+
+
+        
     }
 
     private function include_files() {
@@ -46,7 +49,9 @@ class CulinaryCanvas_Pro {
             'class-recipe-metadata.php',
             'class-recipe-ratings.php',
             'class-recipe-admin.php',
-            
+            'class-recipe-features.php',
+            'class-meal-planner.php',
+            'class-cost-calculator.php'
         );
 
         foreach ($files as $file) {
@@ -54,10 +59,17 @@ class CulinaryCanvas_Pro {
         }
     }
 
+    public $features;
+public $meal_planner;
+public $cost_calculator;
+
     public function init() {
         $this->post_type = new CulinaryCanvas_Recipe_Post_Type();
-        $this->metadata = new CulinaryCanvas_Recipe_Metadata();
-        $this->ratings = new CulinaryCanvas_Recipe_Ratings();
+    $this->metadata = new CulinaryCanvas_Recipe_Metadata();
+    $this->ratings = new CulinaryCanvas_Recipe_Ratings();
+    $this->features = new CulinaryCanvas_Recipe_Features();
+    $this->meal_planner = new CulinaryCanvas_Meal_Planner();
+    $this->cost_calculator = new CulinaryCanvas_Cost_Calculator();
         
 
         if (is_admin()) {

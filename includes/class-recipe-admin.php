@@ -8,6 +8,8 @@ class CulinaryCanvas_Recipe_Admin {
     public function __construct() {
         add_action('admin_menu', array($this, 'add_admin_menu'));
         add_action('admin_enqueue_scripts', array($this, 'enqueue_admin_assets'));
+        wp_enqueue_style('meal-planner-style', CCP_PLUGIN_URL . 'assets/css/meal-planner-style.css', array(), CCP_VERSION);
+        wp_enqueue_style('cost-calculator-style', CCP_PLUGIN_URL . 'assets/css/cost-calculator-style.css', array(), CCP_VERSION);
     }
 
     public function enqueue_admin_assets($hook) {
@@ -84,7 +86,47 @@ class CulinaryCanvas_Recipe_Admin {
             'recipe-settings',
             array($this, 'render_settings_page')
         );
+
+
+        // add_submenu_page(
+        //     'recipe-dashboard',
+        //     __('Recipe Features', 'culinary-canvas-pro'),
+        //     __('Features', 'culinary-canvas-pro'),
+        //     'manage_options',
+        //     'recipe-features',
+        //     array($this, 'render_features_page')
+        // );
+        
+        add_submenu_page(
+            'recipe-dashboard',
+            __('Meal Planner', 'culinary-canvas-pro'),
+            __('Meal Planner', 'culinary-canvas-pro'),
+            'manage_options',
+            'meal-planner',
+            array($this, 'render_meal_planner_page')
+        );
+        
+        add_submenu_page(
+            'recipe-dashboard',
+            __('Cost Calculator', 'culinary-canvas-pro'),
+            __('Cost Calculator', 'culinary-canvas-pro'),
+            'manage_options',
+            'cost-calculator',
+            array($this, 'render_cost_calculator_page')
+        );
     }
+
+    public function render_cost_calculator_page() {
+        include CCP_PLUGIN_DIR . 'templates/cost-calculator.php';
+    }
+    
+    public function render_meal_planner_page() {
+        include CCP_PLUGIN_DIR . 'templates/meal-planner.php';
+    }
+    
+    // public function render_features_page() {
+    //     include CCP_PLUGIN_DIR . 'templates/features.php';
+    // }
 
     public function render_dashboard_page() {
         include CCP_PLUGIN_DIR . 'templates/dashboard.php';

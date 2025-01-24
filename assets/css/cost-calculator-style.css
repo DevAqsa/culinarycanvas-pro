@@ -1,0 +1,287 @@
+.cost-calculator-container {
+    margin: 20px 0;
+}
+
+.ingredient-costs-section,
+.recipe-cost-calculation {
+    background: #fff;
+    padding: 20px;
+    border: 1px solid #ccd0d4;
+    border-radius: 4px;
+    margin-bottom: 20px;
+}
+
+.ingredient-costs-section h2,
+.recipe-cost-calculation h2 {
+    margin-top: 0;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+
+#add-ingredient-row input,
+#add-ingredient-row select {
+    width: 100%;
+}
+
+.recipe-selector {
+    margin-bottom: 20px;
+}
+
+#recipe-select {
+    width: 100%;
+    max-width: 400px;
+}
+
+.wp-list-table {
+    border-collapse: collapse;
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+.wp-list-table th,
+.wp-list-table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+}
+
+.wp-list-table th {
+    background: #f8f9fa;
+    font-weight: 600;
+}
+
+.wp-list-table tr:hover {
+    background: #f8f9fa;
+}
+
+.button {
+    margin: 0 4px;
+}
+
+input[type="number"] {
+    width: 100px;
+}
+
+.edit-ingredient,
+.delete-ingredient {
+    padding: 2px 8px;
+    font-size: 12px;
+}
+
+#recipe-ingredients-cost {
+    margin-top: 20px;
+}
+
+#recipe-ingredients-cost table tfoot th {
+    text-align: right;
+}
+
+.cost-total {
+    font-weight: 700;
+    color: #2271b1;
+}
+
+/* Edit mode styles */
+.edit-name,
+.edit-unit,
+.edit-cost {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Error messages */
+.error-message {
+    color: #d63638;
+    padding: 10px;
+    background: #fef7f7;
+    border-left: 4px solid #d63638;
+    margin-bottom: 20px;
+}
+
+/* Success messages */
+.success-message {
+    color: #008a20;
+    padding: 10px;
+    background: #f0f6e8;
+    border-left: 4px solid #008a20;
+    margin-bottom: 20px;
+}
+
+/* Loading state */
+.loading {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+/* Tooltip styles */
+.tooltip {
+    position: relative;
+    display: inline-block;
+}
+
+.tooltip .tooltip-text {
+    visibility: hidden;
+    width: 200px;
+    background-color: #333;
+    color: #fff;
+    text-align: center;
+    border-radius: 4px;
+    padding: 5px;
+    position: absolute;
+    z-index: 1;
+    bottom: 125%;
+    left: 50%;
+    margin-left: -100px;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.tooltip:hover .tooltip-text {
+    visibility: visible;
+    opacity: 1;
+}
+
+/* Responsive styles */
+@media screen and (max-width: 782px) {
+    .wp-list-table {
+        display: block;
+        overflow-x: auto;
+    }
+
+    .wp-list-table th,
+    .wp-list-table td {
+        padding: 8px;
+    }
+
+    input[type="number"] {
+        width: 80px;
+    }
+
+    .button {
+        padding: 4px 8px;
+        font-size: 13px;
+    }
+}
+
+/* Form validation styles */
+input:invalid,
+select:invalid {
+    border-color: #d63638;
+}
+
+.validation-message {
+    color: #d63638;
+    font-size: 12px;
+    margin-top: 4px;
+}
+
+/* Print styles */
+@media print {
+    .no-print {
+        display: none !important;
+    }
+
+    .wp-list-table {
+        border: 1px solid #000;
+    }
+
+    .wp-list-table th,
+    .wp-list-table td {
+        border: 1px solid #000;
+    }
+}
+
+/* Animation styles */
+.fade-in {
+    animation: fadeIn 0.3s ease-in;
+}
+
+.fade-out {
+    animation: fadeOut 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes fadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
+/* Currency input styles */
+.currency-input {
+    position: relative;
+    display: inline-block;
+}
+
+.currency-input::before {
+    content: attr(data-currency);
+    position: absolute;
+    left: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #666;
+}
+
+.currency-input input {
+    padding-left: 20px;
+}
+
+/* Total cost highlight styles */
+.total-row {
+    background-color: #f8f9fa !important;
+    font-weight: 700;
+}
+
+.total-row td:last-child {
+    color: #2271b1;
+}
+
+/* Ingredient category styles */
+.ingredient-category {
+    font-weight: 600;
+    background-color: #f0f6fc;
+}
+
+/* Cost breakdown styles */
+.cost-breakdown {
+    margin-top: 20px;
+    padding: 15px;
+    background: #f8f9fa;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.cost-breakdown h3 {
+    margin-top: 0;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 10px;
+}
+
+.cost-breakdown-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px dashed #ddd;
+}
+
+.cost-breakdown-item:last-child {
+    border-bottom: none;
+}
+
+/* Chart styles */
+.cost-chart-container {
+    margin-top: 20px;
+    padding: 20px;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.cost-chart {
+    height: 300px;
+    width: 100%;
+}

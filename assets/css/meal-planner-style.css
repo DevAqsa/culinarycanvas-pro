@@ -1,0 +1,165 @@
+.meal-planner-container {
+    display: grid;
+    grid-template-columns: 250px 1fr;
+    gap: 20px;
+    margin: 20px 0;
+}
+
+.meal-planner-sidebar {
+    background: #fff;
+    padding: 15px;
+    border: 1px solid #ccd0d4;
+    border-radius: 4px;
+}
+
+#recipe-search {
+    width: 100%;
+    margin-bottom: 15px;
+    padding: 8px;
+}
+
+.recipe-list {
+    max-height: 600px;
+    overflow-y: auto;
+}
+
+.recipe-item {
+    padding: 10px;
+    margin: 5px 0;
+    background: #f8f9fa;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    cursor: move;
+}
+
+.recipe-item:hover {
+    background: #f0f0f1;
+}
+
+.meal-planner-calendar {
+    background: #fff;
+    padding: 20px;
+    border: 1px solid #ccd0d4;
+    border-radius: 4px;
+}
+
+.calendar-navigation {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.meal-calendar {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.meal-calendar th,
+.meal-calendar td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: center;
+}
+
+.meal-calendar th {
+    background: #f8f9fa;
+    font-weight: 600;
+}
+
+.meal-time {
+    font-weight: 600;
+    background: #f8f9fa;
+}
+
+.meal-slot {
+    height: 80px;
+    vertical-align: top;
+    padding: 5px;
+}
+
+.drop-hover {
+    background: #e8f0fe;
+}
+
+.planned-recipe {
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 8px;
+    margin: 2px;
+    position: relative;
+}
+
+.remove-recipe {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    background: none;
+    border: none;
+    color: #cc1818;
+    cursor: pointer;
+    padding: 0;
+    font-size: 16px;
+}
+
+.remove-recipe:hover {
+    color: #a00;
+}
+
+.meal-plan-actions {
+    margin-top: 20px;
+    padding: 15px;
+    background: #fff;
+    border: 1px solid #ccd0d4;
+    border-radius: 4px;
+}
+
+.meal-plan-actions button {
+    margin-right: 10px;
+}
+
+/* Modal styles */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+}
+
+.modal-content {
+    position: relative;
+    background: #fff;
+    margin: 50px auto;
+    padding: 20px;
+    max-width: 600px;
+    border-radius: 4px;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.modal-close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    cursor: pointer;
+}
+
+#shopping-list-content ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+#shopping-list-content li {
+    padding: 8px 0;
+    border-bottom: 1px solid #eee;
+}
+
+#shopping-list-content li:last-child {
+    border-bottom: none;
+}
