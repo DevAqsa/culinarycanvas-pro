@@ -35,6 +35,42 @@ class CulinaryCanvas_Recipe_Metadata {
     }
 
     public function render_recipe_meta_box($post) {
+
+         // Enqueue jQuery UI
+         wp_enqueue_script('jquery-ui-sortable');
+        
+         // Add JavaScript for ingredient management
+         add_action('admin_footer', function() {
+             ?>
+             <script>
+             jQuery(document).ready(function($) {
+                 // Add ingredient
+                 $('.add-ingredient').on('click', function() {
+                     var template = `
+                         <div class="ingredient-row">
+                             <input type="text" name="ingredients[]" value="" class="regular-text">
+                             <button type="button" class="remove-ingredient button"><?php _e('Remove', 'culinary-canvas-pro'); ?></button>
+                         </div>
+                     `;
+                     $('.ingredients-container').append(template);
+                 });
+                 
+                 // Remove ingredient
+                 $('.ingredients-container').on('click', '.remove-ingredient', function() {
+                     $(this).closest('.ingredient-row').remove();
+                 });
+                 
+                 // Make ingredients sortable
+                 $('.ingredients-container').sortable({
+                     items: '.ingredient-row',
+                     handle: 'input',
+                     axis: 'y'
+                 });
+             });
+             </script>
+             <?php
+         });
+ 
         wp_nonce_field('recipe_meta_box', 'recipe_meta_box_nonce');
 
         // Get existing values
@@ -182,4 +218,5 @@ class CulinaryCanvas_Recipe_Metadata {
             );
         }
     }
+
 }

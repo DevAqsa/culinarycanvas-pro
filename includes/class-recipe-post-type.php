@@ -28,20 +28,18 @@ class CulinaryCanvas_Recipe_Post_Type {
             'not_found'          => __('No recipes found', 'culinary-canvas-pro'),
             'not_found_in_trash' => __('No recipes found in Trash', 'culinary-canvas-pro')
         );
-
+    
         $args = array(
             'labels'              => $labels,
             'public'              => true,
             'publicly_queryable'  => true,
             'show_ui'             => true,
-            'show_in_menu'        => true,
+            'show_in_menu'        => false, // Change this to false
             'query_var'           => true,
             'rewrite'             => array('slug' => 'recipe'),
             'capability_type'     => 'post',
             'has_archive'         => true,
             'hierarchical'        => false,
-            'menu_position'       => 5,
-            'menu_icon'           => 'dashicons-food',
             'supports'            => array(
                 'title',
                 'editor',
@@ -54,10 +52,9 @@ class CulinaryCanvas_Recipe_Post_Type {
             'rest_base'           => 'recipes',
             'rest_controller_class' => 'WP_REST_Posts_Controller',
         );
-
+    
         register_post_type('recipe', $args);
     }
-
     public function register_taxonomies() {
         // Recipe Category Taxonomy
         $category_labels = array(
